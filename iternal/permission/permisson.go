@@ -1,4 +1,4 @@
-package main
+package permission
 
 import (
 	"strings"
@@ -18,12 +18,12 @@ type PermissionReaderChecker interface {
 	PermissionChecker
 }
 
-type Permissioner struct {
+type permissioner struct {
 	permitted map[string]bool
 	lock      *sync.RWMutex
 }
 
-func (perm *Permissioner) Read(data []byte) {
+func (perm *permissioner) Read(data []byte) {
 	commands := strings.Split(string(data), " ")
 	permitted := make(map[string]bool)
 	for _, cmd := range commands {
@@ -34,7 +34,7 @@ func (perm *Permissioner) Read(data []byte) {
 	perm.permitted = permitted
 }
 
-func (perm *Permissioner) Check(commands []string) (allowed bool) {
+func (perm *permissioner) Check(commands []string) (allowed bool) {
 	if len(commands) == 0 {
 		return false
 	}
@@ -51,6 +51,6 @@ func (perm *Permissioner) Check(commands []string) (allowed bool) {
 	return false
 }
 
-func NewPermissioner() (perm *Permissioner) {
-	return &Permissioner{permitted: make(map[string]bool), lock: new(sync.RWMutex)}
+func NewPermissioner() (perm *permissioner) {
+	return &permissioner{permitted: make(map[string]bool), lock: new(sync.RWMutex)}
 }

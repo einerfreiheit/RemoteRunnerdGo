@@ -13,41 +13,36 @@ import (
 	"time"
 )
 
-func checkError(err error) {
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
 type Server interface {
 	Handle(conn io.ReadWriter) (err error)
 	Serve(address string, network string) (err error)
 	Shutdown() (err error)
 }
 
-func parseCommand(conn io.Reader) (command []string, err error) {
-	reader := bufio.NewReader(conn)
-	data, err := reader.ReadBytes('\n')
-	if err != nil {
-		return make([]string, 0), err
-	}
-	request := string(data[0 : len(data)-1])
-	return strings.Split(request, " "), nil
-}
-
 type Runner interface {
 	Run(cmd []string, conn io.Writer) (err error)
 }
 
-type TaskServer struct {
-	c        *config
-	perm     *Permissioner
+type ServerRunner interface {
+	Server
+	Runner
+}
+
+type Config struct {
+	network string
+	address string
+	timeout int
+}
+
+type TaskRunner struct {
+	c        *Config
+	perm     *permissioner
 	quit     chan interface{}
 	wg       sync.WaitGroup
 	listener net.Listener
 }
 
-func (runner *TaskServer) Serve() {
+func (runner *TaskRunner) Serve() {
 	defer runner.wg.Done()
 	for {
 		conn, err := runner.listener.Accept()
@@ -61,32 +56,24 @@ func (runner *TaskServer) Serve() {
 				continue
 			}
 		}
+		log.Println("Accepted new client: ", conn.RemoteAddr())
 		runner.wg.Add(1)
 		go func() {
 			defer conn.Close()
+			defer runner.wg.Done()
 			if runner.Handle(conn) != nil {
 				log.Println("Failed to handle incomming client, reason:", err)
 			}
-			runner.wg.Done()
 		}()
 	}
 }
 
-func transfer(src io.Reader, dst io.Writer) {
-	writer := bufio.NewWriter(dst)
-	n, err := writer.ReadFrom(src)
-	log.Println("Sent: ", n)
-	if err != nil {
-		log.Println("Error while transfer: ", err)
-	}
-}
-
-func (runner *TaskServer) Run(command []string, conn io.Writer) (err error) {
+func (runner *TaskRunner) Run(command []string, conn io.Writer) (err error) {
 	if !runner.perm.Check(command) {
 		message := fmt.Sprintf("Command %s is not allowed", strings.Join(command, " "))
 		log.Println(message)
 		conn.Write([]byte(message))
-		return
+		return nil
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(runner.c.timeout)*time.Second)
 	defer cancel()
@@ -104,32 +91,57 @@ func (runner *TaskServer) Run(command []string, conn io.Writer) (err error) {
 	if err != nil {
 		return err
 	}
-
 	transfer(stdout, conn)
 	transfer(stderr, conn)
-	return
+	return nil
 }
 
-func (runner *TaskServer) Handle(conn io.ReadWriter) (err error) {
-	commands, err := parseCommand(conn)
+func (runner *TaskRunner) Handle(conn io.ReadWriter) (err error) {
+	commands, err := parse(conn)
 	if err != nil {
 		log.Println("Failed to parse request, reason: ", err)
+		return err
 	}
 	return runner.Run(commands, conn)
 }
 
-func (runner *TaskServer) Shutdown() {
+func (runner *TaskRunner) Shutdown() {
 	close(runner.quit)
 	runner.listener.Close()
 	runner.wg.Wait()
 }
 
-func NewTaskServer(c *config, perm *Permissioner) (runner *TaskServer) {
-	s := &TaskServer{c: c, perm: perm, quit: make(chan interface{})}
+func NewTaskRunner(c *Config, perm *permissioner) (runner *TaskRunner) {
+	s := &TaskRunner{c: c, perm: perm, quit: make(chan interface{})}
 	fmt.Printf("Launching server: %s - %s \n", s.c.network, s.c.address)
 	ln, err := net.Listen(s.c.network, s.c.address)
-	checkError(err)
+	check(err)
 	s.wg.Add(1)
 	s.listener = ln
 	return s
+}
+
+func check(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func transfer(r io.Reader, w io.Writer) {
+	writer := bufio.NewWriter(w)
+	n, err := writer.ReadFrom(r)
+	log.Println("Sent: ", n)
+	if err != nil {
+		log.Println("Error while transfer: ", err)
+	}
+}
+
+func parse(conn io.Reader) (command []string, err error) {
+	reader := bufio.NewReader(conn)
+	data, err := reader.ReadBytes('\n')
+	if err != nil {
+		return make([]string, 0), err
+	}
+	request := string(data[0 : len(data)-1])
+	return strings.Split(request, " "), nil
 }
