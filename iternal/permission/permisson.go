@@ -5,15 +5,15 @@ import (
 	"sync"
 )
 
-// Interface for permission reader
+// Reader is an interface for permission reader
 type Reader interface {
-	// Update permission
+	// Update permission with a space-separated array of allowed commands
 	Read([]byte)
 }
 
-// Interface for permission checker
+//Checker is an interface for permission checker
 type Checker interface {
-	// Check commands permission
+	// Check if command with args (represented by []string) permitted to execute.
 	Check([]string) bool
 }
 
@@ -55,8 +55,7 @@ func (v *validator) Check(commands []string) bool {
 	return false
 }
 
-// Create the permissioner instance.
-// Permissioner is thread-safe.
+// NewPermissioner creates the instance of thread-safe permissioner .
 func NewPermissioner() ReaderChecker {
 	return &validator{permitted: make(map[string]bool), lock: new(sync.RWMutex)}
 }
