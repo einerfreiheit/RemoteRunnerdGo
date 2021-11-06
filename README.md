@@ -12,11 +12,11 @@ Simple remote task runner. Runner executes requests and sends result back. Data 
       
  - Options:
 
-       -t: task execution timeout, sec; default: 0.
+       -t: task execution timeout (>= 1 sec), sec; default: 1
     
-       -a: address (port for TCP, path for UDS)
+       -a: address (port for TCP, path for UDS), default - 8081
        
-       -p: protocol (tcp, tcp4, tcp6, unix)
+       -p: protocol (tcp, tcp4, tcp6, unix), default - tcp
         
   - Usage example:
   
