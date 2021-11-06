@@ -8,9 +8,13 @@ import (
 	"sync"
 )
 
+// Interface for a task acceptor
 type Acceptor interface {
+	// Set onAccept callback
 	AcceptFunc(onAccept func(conn io.ReadWriter) error)
+	// Start accepting  requests
 	Serve()
+	// Stop accepting requests
 	Stop() error
 }
 
@@ -60,6 +64,8 @@ func (ts *taskAcceptor) Stop() error {
 	return nil
 }
 
+// Provide protocol and address to  create a new instance of the Acceptor.
+// The network must be "tcp", "tcp4", "tcp6", "unix" or "unixpacket".
 func NewAcceptor(network string, address string) (Acceptor, error) {
 	fmt.Printf("Launching server: network - %s, address - %s \n", network, address)
 	ts := &taskAcceptor{quit: make(chan interface{})}

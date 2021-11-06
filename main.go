@@ -17,14 +17,14 @@ const (
 	path string = "/etc/remote-runnerd.conf"
 )
 
-type Config struct {
+type config struct {
 	network string
 	address string
 	timeout time.Duration
 }
 
-func read() (c *Config) {
-	c = new(Config)
+func read() (c *config) {
+	c = new(config)
 	flag.StringVar(&c.network, "p", "tcp", "Specify network protocol. Default is tcp ( tcp, tcp4, tcp6, unix or unixpacket are also supported)")
 	flag.StringVar(&c.address, "a", ":8081", "Specify address. Default is :8081")
 	var timeout int

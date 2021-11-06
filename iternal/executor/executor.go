@@ -13,8 +13,11 @@ import (
 	"github.com/einerfreiheit/RemoteRunnerdGo/iternal/runner"
 )
 
+// Interface of a task executor
 type Executor interface {
+	// Start to accept and execute incoming requests
 	Start()
+	// Stop accepting requests
 	Stop() error
 }
 
@@ -32,6 +35,9 @@ func (te *taskExecutor) Start() {
 func (te *taskExecutor) Stop() error {
 	return te.ac.Stop()
 }
+
+// Provide protocol, address and permission.Checker to create an exector of remote requests.
+// The network must be "tcp", "tcp4", "tcp6", "unix" or "unixpacket".
 
 func MakeExecutor(network string, address string, checker permission.Checker) (e Executor, err error) {
 	ac, err := acceptor.NewAcceptor(network, address)
