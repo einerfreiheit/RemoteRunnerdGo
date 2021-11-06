@@ -17,6 +17,7 @@ type Checker interface {
 	Check([]string) bool
 }
 
+//ReaderChecker is an interface for both Reader and Checker
 type ReaderChecker interface {
 	Reader
 	Checker
