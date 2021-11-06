@@ -8,7 +8,7 @@ import (
 	"sync"
 )
 
-// Interface for a task acceptor
+// Acceptor ins tht interface for a task acceptor
 type Acceptor interface {
 	// Set onAccept callback
 	AcceptFunc(onAccept func(conn io.ReadWriter) error)
@@ -64,6 +64,7 @@ func (ts *taskAcceptor) Stop() error {
 	return nil
 }
 
+// NewAcceptor creates new instance of the Acceptor.
 // Provide protocol and address to  create a new instance of the Acceptor.
 // The network must be "tcp", "tcp4", "tcp6", "unix" or "unixpacket".
 func NewAcceptor(network string, address string) (Acceptor, error) {
