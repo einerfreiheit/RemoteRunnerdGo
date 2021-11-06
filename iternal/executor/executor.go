@@ -13,7 +13,7 @@ import (
 	"github.com/einerfreiheit/RemoteRunnerdGo/iternal/runner"
 )
 
-//Executor is interface of task execution service.
+// Executor is interface of task execution service.
 type Executor interface {
 	// Start to accept and execute incoming requests.
 	Start()
@@ -36,7 +36,7 @@ func (te *taskExecutor) Stop() error {
 	return te.ac.Stop()
 }
 
-//MakeExecutor creates new instance of the Executor.
+// MakeExecutor creates new instance of the Executor.
 // Provide protocol, address and permission.Checker to create an exector of remote requests.
 // The network must be "tcp", "tcp4", "tcp6", "unix" or "unixpacket".
 func MakeExecutor(network string, address string, checker permission.Checker) (e Executor, err error) {

@@ -11,13 +11,13 @@ type Reader interface {
 	Read([]byte)
 }
 
-//Checker is an interface for permission checker
+// Checker is an interface for permission checker
 type Checker interface {
 	// Check if command with args (represented by []string) permitted to execute.
 	Check([]string) bool
 }
 
-//ReaderChecker is an interface for both Reader and Checker
+// ReaderChecker is an interface for both Reader and Checker
 type ReaderChecker interface {
 	Reader
 	Checker

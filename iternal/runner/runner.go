@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-//Runner is an task runner interface
+// Runner is an task runner interface
 type Runner interface {
 	// Execute a cmd with args (represented by []string) with specified timeout (sec).
 	Run(cmd []string, timeout time.Duration) error
@@ -50,7 +50,7 @@ func transfer(r io.Reader, w io.Writer) {
 	}
 }
 
-//NewTaskRunner creates Runner instance. Provide io.Writer for task output.
+// NewTaskRunner creates Runner instance. Provide io.Writer for task output.
 func NewTaskRunner(w io.Writer) Runner {
 	return &taskRunner{w: w}
 }
