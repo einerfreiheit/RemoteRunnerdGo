@@ -1,5 +1,5 @@
 # RemoteRunnerdGo
-
+[![Go Report Card](https://goreportcard.com/badge/github.com/einerfreiheit/RemoteRunnerdGo)](https://goreportcard.com/report/github.com/einerfreiheit/RemoteRunnerdGo)
 Simple remote task runner. Runner executes requests and sends result back. Data can be transmitted via TCP or UDS (Unix Domain Socket). 
 
  - Configuration:
